@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "232645560386",
+    "firebase_url": "https://chatbot-b839a.firebaseio.com",
+    "project_id": "chatbot-b839a",
+    "storage_bucket": "chatbot-b839a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:232645560386:android:962c93314980589d",
+        "android_client_info": {
+          "package_name": "com.example.tawrun.chatbot"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "232645560386-qvn95qa8biuuptjitlrp5vbsivjgmrfq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSqevE5s7lMgu9DsUSUc2KEv0ysVr3w_4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
