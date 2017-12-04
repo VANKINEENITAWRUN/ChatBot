@@ -3,6 +3,7 @@ package com.example.tawrun.chatbot;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,7 +30,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
-public class MainActivity extends AppCompatActivity {
+import ai.api.AIListener;
+import ai.api.AIServiceException;
+import ai.api.android.AIConfiguration;
+import ai.api.android.AIDataService;
+import ai.api.android.AIService;
+import ai.api.model.AIError;
+import ai.api.model.AIRequest;
+import ai.api.model.AIResponse;
+import ai.api.model.Result;
+
+public class MainActivity extends AppCompatActivity implements AIListener {
 
     private RecyclerView recyclerView;
     private ImageView mSendButtonImage;
@@ -39,6 +50,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean hasNoChar=true;
     private FirebaseDatabase database;
     private DatabaseReference msgRef;
+
+    private AIService aiService;
+    private AIConfiguration aiConfig;
+
+    AIDataService aiDataService;
+    AIRequest aiRequest;
 
     private FirebaseRecyclerAdapter mMessagesAdapter;
    LinearLayoutManager linearLayoutManager ;
@@ -56,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         msgRef.keepSynced(true);
 
         Query query= msgRef.child("chat")
-                .limitToFirst(50);
+                .limitToLast(150);
         query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -115,8 +132,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     holder.mBotText.setText(model.getMessage());
 
-                    holder.mBotText.setVisibility(View.GONE);
-                    holder.mUserText.setVisibility(View.VISIBLE);
+                    holder.mBotText.setVisibility(View.VISIBLE);
+                    holder.mUserText.setVisibility(View.GONE);
                 }
 
             }
@@ -135,9 +152,6 @@ public class MainActivity extends AppCompatActivity {
                         (positionStart >= (msgCount - 1) &&
                                 lastVisiblePosition == (positionStart - 1))) {
                     recyclerView.scrollToPosition(positionStart);
-
-
-
                 }
 
             }
@@ -145,6 +159,16 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(mMessagesAdapter);
         mMessagesAdapter.startListening();
+
+      aiConfig = new AIConfiguration("74658a690df8421a8e43d211d9a87cea",
+                AIConfiguration.SupportedLanguages.English,
+                AIConfiguration.RecognitionEngine.System);
+
+        aiService = AIService.getService(this, aiConfig);
+        aiService.setListener(this);
+        aiDataService = new AIDataService(this,aiConfig);
+
+         aiRequest = new AIRequest();
     }
 
     private void assignViews() {
@@ -176,6 +200,31 @@ public class MainActivity extends AppCompatActivity {
 
                     mMessage.setText("");
 
+                    aiRequest.setQuery(messge);
+                    new AsyncTask<AIRequest,Void,AIResponse>(){
+
+                        @Override
+                        protected AIResponse doInBackground(AIRequest... aiRequests) {
+                            final AIRequest request = aiRequests[0];
+                            try {
+                                final AIResponse response = aiDataService.request(aiRequest);
+                                return response;
+                            } catch (AIServiceException e) {
+                            }
+                            return null;
+                        }
+                        @Override
+                        protected void onPostExecute(AIResponse response) {
+                            if (response != null) {
+
+                                Result result = response.getResult();
+                                String reply = result.getFulfillment().getSpeech();
+                                MessageModel chatMessage = new MessageModel(reply, false);
+                                msgRef.child("chat").push().setValue(chatMessage);
+                            }
+                        }
+                    }.execute(aiRequest);
+
                 }else{ Log.d("ddffd","messge");
 
                 }
@@ -199,11 +248,13 @@ public class MainActivity extends AppCompatActivity {
                     hasNoChar=false;
 
 
-                   // ImageViewAnimatedChange(MainActivity.this,mSendButtonImage,img);
+                    ImageViewAnimatedChange(MainActivity.this,mSendButtonImage,img);
 
                 }else if(charSequence.toString().trim().isEmpty()){
                     Log.d("xcc","csc");
                     hasNoChar=true;
+
+                    ImageViewAnimatedChange(MainActivity.this,mSendButtonImage,img1);
 
                 }
 
@@ -239,5 +290,48 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         v.startAnimation(anim_out);
+    }
+
+    @Override
+    public void onResult(ai.api.model.AIResponse response) {
+
+
+
+        Result result = response.getResult();
+        String message = result.getResolvedQuery();
+        MessageModel chatMessage0 = new MessageModel(message, true);
+        msgRef.child("chat").push().setValue(chatMessage0);
+
+
+        String reply = result.getFulfillment().getSpeech();
+        MessageModel chatMessage = new MessageModel(reply, false);
+        msgRef.child("chat").push().setValue(chatMessage);
+
+
+    }
+
+    @Override
+    public void onError(ai.api.model.AIError error) {
+
+    }
+
+    @Override
+    public void onAudioLevel(float level) {
+
+    }
+
+    @Override
+    public void onListeningStarted() {
+
+    }
+
+    @Override
+    public void onListeningCanceled() {
+
+    }
+
+    @Override
+    public void onListeningFinished() {
+
     }
 }

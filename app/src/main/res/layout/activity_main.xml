@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:clipToPadding="false"
         android:paddingBottom="15dp"
+        android:windowSoftInputMode="adjustResize"
         app:layout_constraintBottom_toTopOf="@id/relativeLayout"
          />
 
