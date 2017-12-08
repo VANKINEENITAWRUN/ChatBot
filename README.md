@@ -1,2 +1,2 @@
 # ChatBot
-simple chatbot using firebase
+simple chatbot App using firebase to store messages and dialogflow smalltalk for reponse to the user message

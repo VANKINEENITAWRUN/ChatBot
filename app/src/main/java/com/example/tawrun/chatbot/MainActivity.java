@@ -1,5 +1,6 @@
 package com.example.tawrun.chatbot;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -189,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements AIListener {
 
         mSendButton.setOnClickListener(new View.OnClickListener(){
 
+            @SuppressLint("StaticFieldLeak")
             @Override
             public void onClick(View view) {
 
@@ -205,7 +207,6 @@ public class MainActivity extends AppCompatActivity implements AIListener {
 
                         @Override
                         protected AIResponse doInBackground(AIRequest... aiRequests) {
-                            final AIRequest request = aiRequests[0];
                             try {
                                 final AIResponse response = aiDataService.request(aiRequest);
                                 return response;
